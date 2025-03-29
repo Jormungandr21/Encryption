@@ -16,7 +16,7 @@ from Crypto.Protocol.KDF import scrypt
 from Crypto.Cipher import *
 from Crypto.PublicKey import RSA
 import io 
-
+import hashlib
 
 def generate_a_key():
     if os.path.exists("secret.key"):
@@ -145,6 +145,12 @@ def rsa_decrypt(encrypted_msg, private_key_data=None):
     print("Message has been decrypted using RSA")
     return decrypted_msg.decode()
 
+def sha256_hash():
+    msg = "Find success and protect your reputation"
+    hash_obj = hashlib.sha256(msg.encode())
+    sha_hash = hash_obj.hexdigest()
+    return sha_hash
+
 if __name__ == "__main__":
 
  '''
@@ -161,3 +167,5 @@ if __name__ == "__main__":
 '''
 #test RSA Encryption and keygen
 #rsa_key_gen()
+
+#print("SHA-256 Hash:", sha256_hash())
