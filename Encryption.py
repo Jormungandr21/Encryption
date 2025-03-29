@@ -17,6 +17,7 @@ from Crypto.Cipher import *
 from Crypto.PublicKey import RSA
 import io 
 import hashlib
+import sys
 
 def generate_a_key():
     if os.path.exists("secret.key"):
@@ -67,7 +68,7 @@ def aes_encrypt():
         data = file_read.read(1024*1024)
     tag = aes_cipher.digest() #we done
     file_write.write(tag)
-    print("The encrypted message has been written to encrypted.txt file.")
+    print("The AES encrypted message has been written to encrypted.txt file.")
     file_read.close()
     file_write.close()
 
@@ -97,7 +98,7 @@ def aes_decrypt():
     file_write.write(decrypted_msg)
 
     tag = file_read.read(16) #get tag and verify
-    print("The decrypted message has been written to decrypted.txt file.")
+    print("The AES decrypted message has been written to decrypted.txt file.")
     try:
         aes_cipher.verify(tag)
     except ValueError as e:
@@ -151,6 +152,18 @@ def sha256_hash():
     sha_hash = hash_obj.hexdigest()
     return sha_hash
 
+def caesar_encrypt(message, key, decrypt=False):
+    result = ""
+    for c in message:
+        if c.isalpha():
+            shift = key if not decrypt else -key
+            if c.islower():
+                result+= chr(((ord(c)-ord('A') + shift) % 26) + ord('A'))
+            else:
+                result+=c
+    return result
+
+
 if __name__ == "__main__":
 
  '''
@@ -162,10 +175,20 @@ if __name__ == "__main__":
     print("Decrypted message:", decrypt_msg)
 
 #test AES Galois Counter Mode encryption and decryption
-#aes_encrypt()
-#aes_decrypt()
-'''
+aes_encrypt()
+aes_decrypt()
+
 #test RSA Encryption and keygen
 #rsa_key_gen()
 
 #print("SHA-256 Hash:", sha256_hash())
+
+#test caesar cipher
+encrypt_txt = input("Please Enter the message to be encrypted using Caesar cipher:")
+shift = int(input("Please specify the shift length:")) #should be 0-25 cause 26 letters in alphabet
+if shift > 25 or shift < 0:
+   print(f"Your shift length should be between 0 and 25")
+   sys.exit()
+encrypted_msg = caesar_encrypt(encrypt_txt, shift)
+print(f"{encrypt_txt} has been encrypted as {encrypted_msg}")
+'''
