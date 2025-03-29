@@ -5,13 +5,7 @@ try:
     print("Cryptography package installed successfully")
     
     import Crypto
-    print("PyCryptodome installed successfully")
-    
-    import cryptocode
-    print("Cryptocode installed successfully")
-    
-    from simplecrypt import encrypt, decrypt
-    print("Simplecrypt installed successfully")
+    print("Crypto installed successfully")
 except ImportError as e:
     print(f"Import error: {e}")
 '''
@@ -19,8 +13,10 @@ from cryptography.fernet import Fernet
 import os
 from Crypto.Random import *
 from Crypto.Protocol.KDF import scrypt
-from Crypto.Cipher import AES
+from Crypto.Cipher import *
+from Crypto.PublicKey import RSA
 import io 
+
 
 def generate_a_key():
     if os.path.exists("secret.key"):
@@ -39,6 +35,7 @@ def encrypt_message(msg):
     encoded_msg = msg.encode()
     fkey = Fernet(key)
     encrypted_msg = fkey.encrypt(encoded_msg)
+    print("message has been encrypted")
     return encrypted_msg
 
 def decrypt_message(msg):
@@ -46,6 +43,7 @@ def decrypt_message(msg):
     key = load_key()
     fkey = Fernet(key)
     decrypted_msg = fkey.decrypt(msg)
+    print("message has been decrypted")
     return decrypted_msg.decode()
 
 def aes_encrypt():
@@ -69,6 +67,7 @@ def aes_encrypt():
         data = file_read.read(1024*1024)
     tag = aes_cipher.digest() #we done
     file_write.write(tag)
+    print("The encrypted message has been written to encrypted.txt file.")
     file_read.close()
     file_write.close()
 
@@ -98,6 +97,7 @@ def aes_decrypt():
     file_write.write(decrypted_msg)
 
     tag = file_read.read(16) #get tag and verify
+    print("The decrypted message has been written to decrypted.txt file.")
     try:
         aes_cipher.verify(tag)
     except ValueError as e:
@@ -108,8 +108,42 @@ def aes_decrypt():
     file_write.close()
     file_read.close()
 
+def rsa_key_gen():
+    key=  RSA.generate(2048)
+    private_key=key.export_key()
+    public_key=key.public_key().export_key()
 
+    with open("private_key.pem","wb") as x_file:
+        x_file.write(private_key)
+    with open("public_key.pem","wb") as pub_file:
+        pub_file.write(public_key)
+    return private_key, public_key
+
+def rsa_encrypt(plain_text, public_key_data=None):
+    if public_key_data is None:
+        with open("public_key.pem","wb") as pub_file:
+            public_key_data=pub_file.read()
+    public_key=RSA.import_key(public_key_data)
+    
+    rsa_cipher=PKCS1_OAEP.new(public_key)
+    rsa_msg_encrypt = rsa_cipher.encrypt(plain_text.encode())
+
+    encrypted_msg = base64.b64encode(rsa_msg_encrypt).decode()
+    print("Message has been encrypted using RSA")
+    return encrypted_msg        
    
+def rsa_decrypt(encrypted_msg, private_key_data=None):
+    if private_key_data is None:
+        with open("private_key.pem", "rb") as x:
+            private_key_data = x.read()
+    
+    private_key = RSA.import_key(private_key_data)
+
+    rsa_cipher = PKCS1_OAEP.new(private_key)
+    rsa_decrpyt_msg = base64.b64decode(encrypted_text)
+    decrypted_msg = cipher.decrypt(rsa_decrpyt_msg)
+    print("Message has been decrypted using RSA")
+    return decrypted_msg.decode()
 
 if __name__ == "__main__":
 
@@ -120,7 +154,10 @@ if __name__ == "__main__":
     print("Encrypted message:", encrypt_msg)
     decrypt_msg = decrypt_message(encrypt_msg)
     print("Decrypted message:", decrypt_msg)
-'''
+
 #test AES Galois Counter Mode encryption and decryption
-aes_encrypt()
-aes_decrypt()
+#aes_encrypt()
+#aes_decrypt()
+'''
+#test RSA Encryption and keygen
+#rsa_key_gen()
